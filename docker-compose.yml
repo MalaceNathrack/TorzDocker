@@ -1,0 +1,62 @@
+version: '3'
+
+services:
+  # Main service: OpenVPN client with Transmission torrent client
+  # This service handles VPN connectivity, automatic server rotation,
+  # connection monitoring, and torrent downloading
+  torzvpn:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: torzvpn
+    # Required capabilities for VPN functionality
+    cap_add:
+      - NET_ADMIN  # Needed for network configuration inside container
+    devices:
+      - /dev/net/tun  # TUN/TAP device for VPN tunnel
+    restart: unless-stopped  # Automatically restart container if it crashes
+    ports:
+      - "9091:9091"  # Expose Transmission web UI on port 9091
+    volumes:
+      # Configuration files for persistence
+      - ./config:/config  # Store configuration files
+      - ./data:/data      # Store application data
+      - ./scripts:/scripts  # Mount scripts for easier development/debugging
+      - ./openvpn:/etc/openvpn/custom  # Mount OpenVPN configuration files
+      - ${DOWNLOADS_PATH}:/downloads  # Mount download directory from host
+    environment:
+      # OpenVPN Configuration
+      - OPENVPN_PROVIDER=CUSTOM  # Use custom OpenVPN configuration
+      - OPENVPN_CONFIG=default   # Initial OpenVPN config file to use
+      - OPENVPN_USERNAME=${OPENVPN_USERNAME}  # VPN username from .env
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}  # VPN password from .env
+      - LOCAL_NETWORK=${LOCAL_NETWORK}  # Local network CIDR for split tunneling
+
+      # Transmission Speed Settings
+      - TRANSMISSION_SPEED_LIMIT_UP=${TRANSMISSION_SPEED_LIMIT_UP}  # Upload speed limit in KB/s
+      - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=${TRANSMISSION_SPEED_LIMIT_UP_ENABLED}  # Enable upload limit
+      - TRANSMISSION_SPEED_LIMIT_DOWN=${TRANSMISSION_SPEED_LIMIT_DOWN}  # Download speed limit in KB/s
+      - TRANSMISSION_SPEED_LIMIT_DOWN_ENABLED=${TRANSMISSION_SPEED_LIMIT_DOWN_ENABLED}  # Enable download limit
+
+      # Transmission Directory Configuration
+      - TRANSMISSION_DOWNLOAD_DIR=/downloads  # Final download location
+      - TRANSMISSION_INCOMPLETE_DIR=/downloads/incomplete  # Temporary download location
+      - TRANSMISSION_WATCH_DIR=/data/watch  # Directory to watch for new .torrent files
+      - TRANSMISSION_WATCH_DIR_ENABLED=true  # Enable torrent auto-loading
+      - TRANSMISSION_HOME=/config/transmission-home  # Transmission config directory
+
+      # Security and Network Settings
+      - ENABLE_UFW=true  # Enable Uncomplicated Firewall
+      - HEALTH_CHECK_HOST=${HEALTH_CHECK_HOST}  # Host to ping for connectivity checks
+      - TZ=${TZ}  # Timezone
+      - PUID=${PUID}  # User ID for file permissions
+      - PGID=${PGID}  # Group ID for file permissions
+
+      # Logging Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-0}  # Log level: 0=ERROR, 1=WARN, 2=INFO, 3=DEBUG
+      - LOG_TO_STDOUT=${LOG_TO_STDOUT:-true}  # Output logs to Docker logs
+      - LOG_FILE=${LOG_FILE:-/var/log/torzvpn.log}  # Path to log file
+
+      # DNS Leak Protection Settings
+      - PEER_DNS=true  # Use VPN provider's DNS servers
+      - PEER_DNS_PIN_ROUTES=true  # Ensure DNS requests go through VPN

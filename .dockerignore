@@ -1,0 +1,26 @@
+# Ignore sensitive files
+.env
+.env.example
+config/openvpn-credentials.txt
+config/transmission-credentials.txt
+
+# Ignore git files
+.git
+.gitignore
+
+# Ignore downloaded data
+data/
+downloads/
+
+# Ignore temporary files
+*.tmp
+*.log
+*.swp
+
+# Ignore documentation
+README.md
+LICENSE
+
+# Ignore development files
+.vscode/
+.idea/

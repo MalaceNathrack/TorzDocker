@@ -1,0 +1,12 @@
+ca.protonvpn.udp
+no.protonvpn.udp
+uk.protonvpn.udp
+us.protonvpn.udp
+ca.protonvpn.udp
+no.protonvpn.udp
+uk.protonvpn.udp
+us.protonvpn.udp
+ca.protonvpn.udp
+no.protonvpn.udp
+uk.protonvpn.udp
+us.protonvpn.udp

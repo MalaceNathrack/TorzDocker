@@ -1,0 +1,22 @@
+# Ignore OpenVPN configuration files
+openvpn/*.ovpn
+openvpn/current_server.txt
+
+# Ignore Transmission data
+data/*
+!data/watch/
+data/watch/*
+!data/watch/.gitkeep
+
+# Ignore config files that might contain sensitive information
+config/*
+!config/transmission-settings.json
+
+# Ignore logs
+*.log
+
+# Ignore Docker volumes
+volumes/
+
+# Ignore environment variables file with sensitive information
+.env
